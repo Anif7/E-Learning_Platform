@@ -11,28 +11,30 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-from django.urls import reverse_lazy
 import os
+from django.urls import reverse_lazy
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Use Path to handle paths easily
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+if not SECRET_KEY:
+    raise ValueError("The SECRET_KEY environment variable must not be empty.")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p2ulo_g6!iodvax+a^sis+%hufkwso*r=f-^*1*nn^1frev9h1'
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
-
 INSTALLED_APPS = [
     'courses.apps.CoursesConfig',
     'django.contrib.admin',
@@ -53,9 +55,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    #'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -82,21 +82,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'educa.wsgi.application'
 
-
 # Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR / "db.sqlite3"),  # Convert Path to string
+        'NAME': BASE_DIR / "db.sqlite3", 
     }
 }
 
-
-
 # Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -112,53 +106,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
 
-USE_TZ = True
-
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = '/static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-# settings.py
-
-STATIC_URL = '/static/'  # URL prefix for static files
-
-# Directory where Django will search for static files
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',  # Ensure this is correct for your project
-]
-
-# Directory where collected static files will be stored (used during production)
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # Used for production (not needed during development)
 
-LOGIN_REDIRECT_URL = reverse_lazy('student_course_list')
-
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_ROOT = BASE_DIR / 'media'
 
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',  # Use PyMemcacheCache
-#         'LOCATION': '127.0.0.1:11211',  # Ensure this matches your Memcached server
-#     }
-# }
+LOGIN_REDIRECT_URL = reverse_lazy('student_course_list')
 
 CACHES = {
     'default': {
@@ -176,7 +137,7 @@ REST_FRAMEWORK = {
     ]
 }
 
-ASGI_APPLICATION ='educa.routing.application'
+ASGI_APPLICATION = 'educa.routing.application'
 
 CHANNEL_LAYERS = {
     'default': {
